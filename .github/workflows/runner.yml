@@ -8,11 +8,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Clone Private Repo
-        uses: actions/checkout@v4
-        with:
-          repository: iamCristYe/QiQi
-          token: ${{ secrets.PAT_GITHUB }}
-          path: private
+        env:
+          PAT_GITHUB: ${{ secrets.PAT_GITHUB }}
+        run: |
+          git clone https://x-access-token:${PAT_GITHUB}@github.com/iamCristYE/QiQi.git
+          cd QiQi
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -21,7 +21,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          cd private
+          cd QiQi
           pip install requests
 
       - name: Run Scraper
@@ -29,12 +29,12 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
-          cd private
-          # python main.py
+          cd QiQi
+          python main.py
 
       - name: Commit and Push Changes
         run: |
-          cd private
+          cd QiQi
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add data.json
@@ -44,5 +44,3 @@ jobs:
           else
             echo "No changes to commit"
           fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT_GITHUB }}
