@@ -1,0 +1,48 @@
+name: Run Scraper
+
+on:
+  workflow_dispatch:  # Triggered by cron or manually
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone Private Repo
+        uses: actions/checkout@v4
+        with:
+          repository: iamCristYe/QiQi
+          token: ${{ secrets.PAT_GITHUB }}
+          path: private
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Dependencies
+        run: |
+          cd private
+          pip install requests
+
+      - name: Run Scraper
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          cd private
+          # python main.py
+
+      - name: Commit and Push Changes
+        run: |
+          cd private
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add data.json
+          if [ -n "$(git status --porcelain)" ]; then
+            git commit -m "Update sent IDs - $(date)"
+            git push
+          else
+            echo "No changes to commit"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_GITHUB }}
